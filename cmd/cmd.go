@@ -152,7 +152,6 @@ func ReloadConfig() {
 		return
 	}
 
-	fmt.Println("cmd", "kill", "-USR2", fmt.Sprintf("%d", pidNum))
 	cmd := exec.Command("kill", "-USR2", fmt.Sprintf("%d", pidNum))
 	cmd.Stdout = os.Stdout
 	err = cmd.Start()
@@ -179,8 +178,10 @@ func getPidFile() string {
 
 // Write a pid file
 func WritePidFile() {
+	pidNo := fmt.Sprintf("%d", os.Getpid())
+	fmt.Println("run pid:", pidNo)
 	pidFile := getPidFile()
-	if err := ioutil.WriteFile(pidFile, []byte(fmt.Sprintf("%d", os.Getpid())), 0664); err != nil {
+	if err := ioutil.WriteFile(pidFile, []byte(pidNo), 0664); err != nil {
 		fmt.Println("WritePidFile err", err)
 	}
 }
