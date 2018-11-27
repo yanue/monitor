@@ -21,7 +21,7 @@ import (
 	"os"
 )
 
-var hub *service.Hub
+var hub *service.ServerHub
 
 func main() {
 	// reload config
@@ -39,22 +39,33 @@ func main() {
 		return
 	}
 
-	hub = service.NewService(cmdr)
-
 	gin.SetMode(gin.ReleaseMode)
-
 	router := gin.Default()
 
-	router.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "Welcome Gin Server")
-	})
+	if cmdr.RunMode == cmd.RUN_MODE_SERVER {
+		hub = service.NewService(cmdr)
+		router.GET("/", func(c *gin.Context) {
+			c.String(http.StatusOK, "Welcome Gin Server")
+		})
 
-	router.GET("/join", func(c *gin.Context) {
-		ip := c.DefaultQuery("ip", "")
-		name := c.DefaultQuery("ip", "")
-		hub.AddClient(name, ip, 1)
-		c.JSON(http.StatusOK, "Welcome Gin Server")
-	})
+		router.GET("/join", hub.JoinServer)
+		router.GET("/state", hub.State)
+	} else {
+		cli := service.NewClient(cmdr)
+
+		// join server
+		cli.JoinServer()
+
+		router.GET("/ping", func(c *gin.Context) {
+			c.String(http.StatusOK, "pong")
+		})
+
+		router.GET("/join", cli.JoinCustom)
+		router.GET("/install", cli.InstallMonit)
+		router.GET("/config", cli.ConfigMonit)
+		router.GET("/state", cli.GetState)
+		router.GET("/run", cli.RunCmd)
+	}
 
 	// write pid file
 	cmd.WritePidFile()

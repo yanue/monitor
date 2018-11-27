@@ -14,4 +14,5 @@
     
 # enter docker
     docker exec -it test bash
+    go get github.com/silenceper/gowatch
     

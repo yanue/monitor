@@ -117,6 +117,11 @@ func ParseCmd() (cmd *Cmd, err error) {
 		return
 	}
 
+	if _, e := os.Stat(cmd.WorkDir); os.IsNotExist(e) {
+		err = errors.New("work dir is not exist")
+		return
+	}
+
 	if cmd.RunMode == RUN_MODE_CLIENT && len(cmd.JoinAddr) == 0 {
 		err = errors.New("missing json addr when run at client mode")
 		return
